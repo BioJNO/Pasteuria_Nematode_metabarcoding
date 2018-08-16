@@ -1,6 +1,3 @@
-from Bio.Seq import Seq
-from Bio.Alphabet import generic_dna
-from Bio import SeqIO
 from Bio.SeqIO.FastaIO import SimpleFastaParser
 import regex
 
