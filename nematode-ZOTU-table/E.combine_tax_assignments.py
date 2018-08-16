@@ -2,40 +2,40 @@
 
 import mmap
 
-# Write the outfile and (important) close it again. 
+# Write the outfile and (important) close it again.
 outhandle = ("nematode_taxonomy_combined.txt")
 outfile = open(outhandle, "w")
-# You can't mmap an empty file so add column headers. 
+# You can't mmap an empty file so add column headers.
 outfile.write("Zotu\ttaxid\tquality\tnumbersubseqs\tnewID\n")
 outfile.close
 
 ''' files in this list MUST be in order from highest stringency to lowest otherwise output will include vaguest possible assignments for each taxa '''
-# Open list of tax assignment table handles. 
+# Open list of tax assignment table handles.
 filelist = open("tax_assignment_handles.txt", "r")
 
-# Iterate through list of tax tables and open each for reading. 
-for handle in filelist: 
+# Iterate through list of tax tables and open each for reading.
+for handle in filelist:
 	handle = handle.rstrip("\n")
 	file = open(handle, "r")
 	matchthresh = handle.split("-")[0]
-	# Iterate through each line in each file. 
+	# Iterate through each line in each file.
 	for line in file:
-	# Split each line in the table into it's elements. 
+	# Split each line in the table into it's elements.
 		vals = line.split("\t")
 		tax = vals[1]
 		zotu = vals[0]
-		# Split the tax assignment into each level. 
+		# Split the tax assignment into each level.
 		taxelement = tax.split(";")
-		# Create a new ZOTU name from the Zotu number and most specific (final) Tax level. 
+		# Create a new ZOTU name from the Zotu number and most specific (final) Tax level.
 		newID = zotu.replace("Otu", "") + "_" + taxelement[-1] + "_" + matchthresh
-		# Open the outfile to read and write. 
+		# Open the outfile to read and write.
 		outfile = open(outhandle, "a+")
-		# Use mmap to make a searchable file object s. 
+		# Use mmap to make a searchable file object s.
 		s = mmap.mmap(outfile.fileno(), 0, access=mmap.ACCESS_READ)
-		# If taxonomy is assigned and an otu tax assignment does not already exist in the outfile... 
+		# If taxonomy is assigned and an otu tax assignment does not already exist in the outfile...
 		t = s.find(zotu + "\t")
 		if tax != "Unassigned" and t == -1:
-			# ...write the entry for this tax assignment to the output combined tax table.  
+			# ...write the entry for this tax assignment to the output combined tax table.
 			outfile.write(line.rstrip("\n") + "\t" + newID + "\n")
-			
+
 outfile.close()
