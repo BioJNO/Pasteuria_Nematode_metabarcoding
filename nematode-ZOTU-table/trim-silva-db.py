@@ -19,6 +19,7 @@ outfile2 = open("Silva-108-failed-minlen.fasta.fasta", "w")
 outfile3 = open("Silva-108-failed-primer-maxlen-filter.fasta", "w")
 outfile4 = open("Silva-108-no-primer-match.fasta", "w")
 
+
 # We've set this up as a function to make it easier to fiddle with the parameters
 def cutprimers(input_hadle, fprimer, rprimer, minlen, maxlen, outfile1, outfile2, outfile3, outfile4):
 	# Parse the fasta reference file
