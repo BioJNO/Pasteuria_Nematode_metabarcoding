@@ -55,6 +55,7 @@ def cutprimers(input_hadle, fprimer, rprimer, minlen, maxlen, outfile1, outfile2
 		else:
 			outfile4.write(">%s\n%s\n" % (title, seq))
 
+
 # Call the function
 cutprimers(input_handle, NemF, NemR_rc, 339, 420, outfile1, outfile2, outfile3, outfile4)
 
