@@ -10,7 +10,7 @@ outfile = open("nematode_zotu_metadata.csv", "w")
 outfile.write("Zotu_ID,seqlen,seq\n")
 
 for title, seq in SimpleFastaParser(fasta_handle):
-	seqlen = len(seq)
-	outfile.write("%s,%s,%s\n" % (title, seqlen, seq))
+    seqlen = len(seq)
+    outfile.write("%s,%s,%s\n" % (title, seqlen, seq))
 
 outfile.close()

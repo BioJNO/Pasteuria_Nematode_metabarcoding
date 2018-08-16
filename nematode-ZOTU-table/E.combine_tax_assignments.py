@@ -15,27 +15,27 @@ filelist = open("tax_assignment_handles.txt", "r")
 
 # Iterate through list of tax tables and open each for reading.
 for handle in filelist:
-	handle = handle.rstrip("\n")
-	file = open(handle, "r")
-	matchthresh = handle.split("-")[0]
-	# Iterate through each line in each file.
-	for line in file:
-	# Split each line in the table into it's elements.
-		vals = line.split("\t")
-		tax = vals[1]
-		zotu = vals[0]
-		# Split the tax assignment into each level.
-		taxelement = tax.split(";")
-		# Create a new ZOTU name from the Zotu number and most specific (final) Tax level.
-		newID = zotu.replace("Otu", "") + "_" + taxelement[-1] + "_" + matchthresh
-		# Open the outfile to read and write.
-		outfile = open(outhandle, "a+")
-		# Use mmap to make a searchable file object s.
-		s = mmap.mmap(outfile.fileno(), 0, access=mmap.ACCESS_READ)
-		# If taxonomy is assigned and an otu tax assignment does not already exist in the outfile...
-		t = s.find(zotu + "\t")
-		if tax != "Unassigned" and t == -1:
-			# ...write the entry for this tax assignment to the output combined tax table.
-			outfile.write(line.rstrip("\n") + "\t" + newID + "\n")
+    handle = handle.rstrip("\n")
+    file = open(handle, "r")
+    matchthresh = handle.split("-")[0]
+    # Iterate through each line in each file.
+    for line in file:
+    # Split each line in the table into it's elements.
+        vals = line.split("\t")
+        tax = vals[1]
+        zotu = vals[0]
+        # Split the tax assignment into each level.
+        taxelement = tax.split(";")
+        # Create a new ZOTU name from the Zotu number and most specific (final) Tax level.
+        newID = zotu.replace("Otu", "") + "_" + taxelement[-1] + "_" + matchthresh
+        # Open the outfile to read and write.
+        outfile = open(outhandle, "a+")
+        # Use mmap to make a searchable file object s.
+        s = mmap.mmap(outfile.fileno(), 0, access=mmap.ACCESS_READ)
+        # If taxonomy is assigned and an otu tax assignment does not already exist in the outfile...
+        t = s.find(zotu + "\t")
+        if tax != "Unassigned" and t == -1:
+            # ...write the entry for this tax assignment to the output combined tax table.
+            outfile.write(line.rstrip("\n") + "\t" + newID + "\n")
 
 outfile.close()
