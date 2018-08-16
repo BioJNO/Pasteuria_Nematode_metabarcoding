@@ -2,8 +2,8 @@
 # we need to flip the amplicons which assemble in the
 # reverse orientation back into the expected orientation.
 
+
 # Import the required modules from Biopython.
-from Bio.Alphabet import generic_dna
 from Bio import SeqIO
 
 # Open output files to store the flipped amplicons.
