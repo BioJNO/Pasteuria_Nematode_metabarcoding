@@ -19,41 +19,41 @@ outfile4 = open("Silva-108-no-primer-match.fasta", "w")
 
 # We've set this up as a function to make it easier to fiddle with the parameters
 def cutprimers(input_hadle, fprimer, rprimer, minlen, maxlen, outfile1, outfile2, outfile3, outfile4):
-	# Parse the fasta reference file
-	for title, seq in SimpleFastaParser(input_handle):
-		# Look for the f and r primers in each sequence
-		fprimersear = fprimer.search(seq)
-		rprimersear = rprimer.search(seq)
+    # Parse the fasta reference file
+    for title, seq in SimpleFastaParser(input_handle):
+        # Look for the f and r primers in each sequence
+        fprimersear = fprimer.search(seq)
+        rprimersear = rprimer.search(seq)
 
-		# If you've found both primers...
-		if fprimersear > -1 and rprimersear > -1:
-			# Get the start and end position of the primers
-			fstart = fprimersear.start()
-			rstart = rprimersear.start()
-			fend = fprimersear.end()
-			rend = rprimersear.end()
-			# Get the frame, which will be the size of your PCR products without barcodes
-			frame = seq[fstart:rend]
-			# Get the frame between primers so that proportional variation between sequences is maximised
-			noprimframe = seq[fend:rstart]
-			# Calculte the thoretical length of the PCR product using these primers
-			seqlen = len(frame)
+        # If you've found both primers...
+        if fprimersear > -1 and rprimersear > -1:
+            # Get the start and end position of the primers
+            fstart = fprimersear.start()
+            rstart = rprimersear.start()
+            fend = fprimersear.end()
+            rend = rprimersear.end()
+            # Get the frame, which will be the size of your PCR products without barcodes
+            frame = seq[fstart:rend]
+            # Get the frame between primers so that proportional variation between sequences is maximised
+            noprimframe = seq[fend:rstart]
+            # Calculte the thoretical length of the PCR product using these primers
+            seqlen = len(frame)
 
-			# if the size is correct...
-			if seqlen >= minlen and seqlen <= maxlen:
-				outfile1.write(">%s\n%s\n" % (title, noprimframe))
+            # if the size is correct...
+            if seqlen >= minlen and seqlen <= maxlen:
+                outfile1.write(">%s\n%s\n" % (title, noprimframe))
 
-			# If the product is too short...
-			elif seqlen < minlen:
-				outfile2.write(">%s\n%s\n" % (title, noprimframe))
+            # If the product is too short...
+            elif seqlen < minlen:
+                outfile2.write(">%s\n%s\n" % (title, noprimframe))
 
-			# If the product is too long...
-			elif seqlen > maxlen:
-				outfile3.write(">%s\n%s\n" % (title, noprimframe))
+            # If the product is too long...
+            elif seqlen > maxlen:
+                outfile3.write(">%s\n%s\n" % (title, noprimframe))
 
-		# If you dont find the primers...
-		else:
-			outfile4.write(">%s\n%s\n" % (title, seq))
+        # If you dont find the primers...
+        else:
+            outfile4.write(">%s\n%s\n" % (title, seq))
 
 
 # Call the function
@@ -80,24 +80,24 @@ not_matched = open("not_matched_tax.txt", "w")
 
 # For each line in the taxa mapping file
 for line in Silva_tax_map:
-	# get the name and store it as a variable
-	namestop = line.find("\t")
-	name = line[:namestop]
-	# get the taxonomic info and store it as a variable
-	tax = line[namestop:]
-	# store the name and the taxonomic assignment as a dictionary item
-	f = name, tax
-	name_dict[(name, tax)] = f
+    # get the name and store it as a variable
+    namestop = line.find("\t")
+    name = line[:namestop]
+    # get the taxonomic info and store it as a variable
+    tax = line[namestop:]
+    # store the name and the taxonomic assignment as a dictionary item
+    f = name, tax
+    name_dict[(name, tax)] = f
 
 # For each sequence in the trimmed fasta file
 for title, seq in SimpleFastaParser(Trimmed_silva_fa):
-	# Iterate through the dictionary of ID:taxonomic_info
-	for (name, tax) in name_dict:
-		# if the sequnce title matches the name in the dictionary...
-		if name == title:
-			# write the sequence ID and tax record to the trimmed taxa file
-			name = name.rstrip("\n")
-			Silva_tax_map_trimmed.write("%s%s\n" % (name, tax))
-		else:
-			name = name.rstrip("\n")
-			not_matched.write("%s%s\n" % (name, tax))
+    # Iterate through the dictionary of ID:taxonomic_info
+    for (name, tax) in name_dict:
+        # if the sequnce title matches the name in the dictionary...
+        if name == title:
+            # write the sequence ID and tax record to the trimmed taxa file
+            name = name.rstrip("\n")
+            Silva_tax_map_trimmed.write("%s%s\n" % (name, tax))
+        else:
+            name = name.rstrip("\n")
+            not_matched.write("%s%s\n" % (name, tax))

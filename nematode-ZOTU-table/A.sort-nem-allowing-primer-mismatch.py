@@ -1,10 +1,10 @@
 from Bio.Seq import Seq
-from Bio.Alphabet import generic_dna 
+from Bio.Alphabet import generic_dna
 from Bio import SeqIO
 from Bio.SeqIO.QualityIO import FastqGeneralIterator
 import regex
 
-# Store primers as variables 
+# Store primers as variables
 NemF = "GGTGGTGCATGGCCGTTCTTAGTT"
 NemR = "TACAAAGGGCAGGGACGTAAT"
 NemRseq = Seq(NemR, generic_dna)
@@ -15,7 +15,7 @@ NemFs = regex.compile("(GGTGGTGCATGGCCGTTCTTAGTT){s<=1}")
 NemR_rcs = regex.compile("(ATTACGTCCCTGCCCTTTGTA){s<=1}")
 
 # Store list of barcode sequences as variable
-taglist = ["AAGGTC", "ACCTCA", "ACGTGT", "ACTCTG", "AGCATG", "AGTCCA", "CAACTC", "CAAGCA", "CACAGT", "CAGGAT", "CAGTTG", "CCATAC", "CCTGTA", "CGATCT", "CGTAGA", "CTCACA", "CTGAAC", "CTTGCT", "GAAGTG", "GACTTC", "GAGCTA", "GATGGT", "GCAGAA", "GCTTGA", "GGAACA", "GGTATC","GTCGTA", "GTGATG", "GTTCAC", "TCCAGA", "TCGTTC", "TGGACT"]
+taglist = ["AAGGTC", "ACCTCA", "ACGTGT", "ACTCTG", "AGCATG", "AGTCCA", "CAACTC", "CAAGCA", "CACAGT", "CAGGAT", "CAGTTG", "CCATAC", "CCTGTA", "CGATCT", "CGTAGA", "CTCACA", "CTGAAC", "CTTGCT", "GAAGTG", "GACTTC", "GAGCTA", "GATGGT", "GCAGAA", "GCTTGA", "GGAACA", "GGTATC", "GTCGTA", "GTGATG", "GTTCAC", "TCCAGA", "TCGTTC", "TGGACT"]
 
 # Split forward tags into 4 sets of 8 corresponding to primer dilution plates
 taglist1 = taglist[0:8]
@@ -24,10 +24,10 @@ taglist3 = taglist[16:24]
 taglist4 = taglist[24:32]
 
 # Create an empty list to store reverse complement of barcodes
-rctaglist =[]
+rctaglist = []
 
-#Using Biopython generate a list of reverse complement barcodes 
-for tag in taglist: 
+# Using Biopython generate a list of reverse complement barcodes
+for tag in taglist:
     # convert string to seq object
     dna_tag = Seq(tag, generic_dna)
     # use .reverse_complement function to genereate reverse complement of seq object
@@ -77,7 +77,7 @@ input_handle = open("all-nem-amp-maxeefiltered.fastq")
 # We need a file to store assembled reads from each sample
 # There is a system imposed limit on the number of files we can have open at any one time so here we use a last recently used cache
 from lru import LRU
-# At most 999 files open at one time from the LRU cache 
+# At most 999 files open at one time from the LRU cache
 l = LRU(999)
 
 # Create a dictionary to store the output filenames
@@ -85,7 +85,7 @@ filenames = {}
 # Create an output fq file for each sample which is numbered, and contains the corresponding barcode pair
 for x, (rbar, fbar) in enumerate(fr_combo_final):
     f = "nem-%05i-%s-%s.fastq" % (x, fbar, rbar)
-    filenames[(rbar, fbar)] =  f
+    filenames[(rbar, fbar)] = f
     outfile = open(f, "w")
     outfile.close()
 
@@ -107,13 +107,13 @@ for title, seq, qual in FastqGeneralIterator(input_handle):
     fend = fprimersear.end()
     rend = rprimersear.end()
     frame = seq[fstart:rend]
-    fbar = seq[fstart -6: fstart]
+    fbar = seq[fstart - 6: fstart]
     rbar = seq[rend:rend + 6]
-    
+
     # Store the amplified region between primers
     noprimframe = seq[fend:rstart]
     noprimqual = qual[fend:rstart]
-    
+
     # Hoping to find pair of 6bp known barcodes.
     #
     # Checking against the expected pairs via the dictionary ensures
@@ -135,10 +135,10 @@ for title, seq, qual in FastqGeneralIterator(input_handle):
             fr_tallies[(fbar, rbar)] = 1
         # Do we already have an output file ready for this pair?
         if (rbar, fbar) in filenames and (rbar, fbar) in l:
-            # Yes, write the frame to file 
+            # Yes, write the frame to file
             print("Wanted  %s %s" % (fbar, rbar))
             l[(rbar, fbar)].write("@%s\n%s\n+\n%s\n" % (title, noprimframe, noprimqual))
-        elif (rbar, fbar) in filenames: 
+        elif (rbar, fbar) in filenames:
             # No, open the file from the dictionary of handles
             name = filenames[(rbar, fbar)]
             l[(rbar, fbar)] = open(name, "a")
@@ -148,7 +148,7 @@ for title, seq, qual in FastqGeneralIterator(input_handle):
             # We didn't put this barcode pair here! Write it to the oddities file.
             print("Unexpected %s %s" % (fbar, rbar))
             oddities.write("%s\t%s\t%s\t%s\n" % (fbar, rbar, title, seq))
-    
+
 # Close open files
 oddities.close()
 input_handle.close()
