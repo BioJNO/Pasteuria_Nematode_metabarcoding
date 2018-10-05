@@ -33,13 +33,13 @@ source activate qiime1
 # For 100-90% identity...
 for i in 1.0 0.995 0.99 0.98 0.97 0.96 0.95 0.94 0.93 0.92 0.91 0.9
 do 
-	echo "running similarity threshold $i taxa mapping"
-	assign_taxonomy.py -i nematode_alpha1_zotus.fasta \
+    echo "running similarity threshold $i taxa mapping"
+    assign_taxonomy.py -i nematode_alpha1_zotus.fasta \
                    -r Silva-108-primer-trim-strict-len.fasta \
                    -t Silva_108_taxa_mapping_trimmed.txt \
                    -o p$i-tax_match \
                    --similarity $i
-	echo "done"
+    echo "done"
 
 done
 
@@ -54,7 +54,7 @@ mkdir combined_taxonomy
 echo "renaming assigned taxonomy files"
 for i in 1.0 0.995 0.99 0.98 0.97 0.96 0.95 0.94 0.93 0.92 0.91 0.9
 do 
-	cp p$i-tax_match/nematode_alpha1_zotus_tax_assignments.txt combined_taxonomy/$i-tax-assignment.txt
+    cp p$i-tax_match/nematode_alpha1_zotus_tax_assignments.txt combined_taxonomy/$i-tax-assignment.txt
 
 done
 

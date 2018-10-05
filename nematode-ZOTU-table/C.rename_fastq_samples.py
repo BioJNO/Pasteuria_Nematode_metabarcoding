@@ -1,3 +1,4 @@
+# Import module
 from Bio.SeqIO.QualityIO import FastqGeneralIterator
 
 # Open the list of fq file handles
