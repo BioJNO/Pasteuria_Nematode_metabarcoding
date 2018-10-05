@@ -5,7 +5,8 @@ handle_list = open("nem-fq-files.txt")
 # Write an output file to hold all fq records
 f_out = open("all-nem-fq-w-usearch-sampleids.fastq", "w")
 
-# Set an empty numeric value to hold the sample number as we iterate through the sample fq files.
+# Set an empty numeric value to hold the sample number as we iterate through
+# the sample fq files.
 n = 0
 
 # For each sample fq file in the list
