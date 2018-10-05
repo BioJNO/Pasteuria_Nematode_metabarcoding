@@ -8,7 +8,7 @@ ls > nem-fq-files.txt
 sed -i '/nem-fq-files.txt/d' nem-fq-files.txt 
 
 # Move the list back up one level 
-mv list.txt ../
+mv nem-fq-files.txt ../
 
 # Follow it 
 cd ../
