@@ -54,6 +54,10 @@ non_zero <- final_merge[final_merge$perul > 10, ]
 # Subset main pit samples (with the most complete metadata).
 main_pit_non_zero <- non_zero[grep("V0", non_zero$OBSERVATION.NO), ]
 
+# To look at main pit variables only substitute all instances of the
+# "non-zero" data frame in the following lines with the
+# "main_pit_non_zero" data subset generated above.
+
 # Remove columns with missing values.
 complete_cols_non_zero <- non_zero[,!sapply(non_zero, function(x) any(is.na(x)))]
 
