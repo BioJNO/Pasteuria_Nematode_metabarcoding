@@ -44,7 +44,7 @@ do
 done
 
 # We should now have a folder for each identity threshold with taxonomic
-# assignments at that level. Each file within the foleders will have the
+# assignments at that level. Each file within the folders will have the
 # same name "nematode_alpha1_zotus_tax_assignments.txt". We want to give
 # them unique names 
 
