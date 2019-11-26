@@ -12,7 +12,7 @@ library(stringr)
 
 # Plot a base R map of Scotland ----------------------------------------------
 # Read shapefile data.
-scotland = readOGR(dsn="Scotland_caspcs_2001",
+scotland = readOGR(dsn="Mapping/Scotland_caspcs_2001",
                    layer="scotland_caspcs_2001")
 scotland@data$id = rownames(scotland@data)
 scotland.points = fortify(scotland, region="id")
@@ -27,10 +27,12 @@ basemap = basemap + coord_equal()
 basemap
 
 # Load in ZOTU data ----------------------------------------------------------
-samples <- read.csv("NSIS2_metadata.csv")
-nsis_zotus <- read.csv("NSIS_clean_merged_non_zero.csv")
-esfn <- read.csv("ESFN_zotus.csv")
+samples <- read.csv("Mapping/NSIS_metadata.csv")
+nsis_zotus <- read.csv("Mapping/NSIS_clean_merged_non_zero.csv")
+esfn.data <- read.csv("Mapping/ESFN_merged_with_metadata.csv")
 colnames(samples)
+colnames(esfn.data)
+colnames(nsis_zotus)
 
 # Filter the NSIS data frame to leave only the most abundant 
 # for ease of plotting.
@@ -40,15 +42,15 @@ colnames(samples)
 #
 # Set TRUE explicitly for values you want to keep (metadata),
 # and set a condition for the ZOTU columns (>1000).
-colSums(nsis_zotus[,13:108])
-drop <- c(rep(TRUE, 12), colSums(nsis_zotus[,13:108]) > 1000, rep(TRUE, 63))
+sums.df <- as.data.frame(colSums(nsis_zotus[,14:79]))
+drop <- c(rep(TRUE, 13), colSums(nsis_zotus[,14:79]) > 2000, rep(TRUE, 89))
 nsis_zotus <- nsis_zotus[,drop]
 colnames(nsis_zotus)
-colSums(nsis_zotus[13:18])
+colSums(nsis_zotus[14:19])
 
 # Change the structure of the NSIS data frame -------------------------------------
 # Select only the ZOTU columns from the data frame.
-mnsis <- nsis_zotus[,c(13:18)]
+mnsis <- nsis_zotus[,c(14:19)]
 # Transpose the ZOTUs.
 mnsis <- t(mnsis)
 # Take the long format ZOTU table and stack the columns into one.
@@ -63,22 +65,28 @@ merged <- merge(dat.m, nsis_zotus, by = "colid")
 merged <- merged[merged$reads > 0, ]
 colnames(merged)
 # Convert total assembled reads to amplicons per microliter.
-merged$amplicons_per_ul <- merged$reads/merged$vol
+merged$amplicons_per_ul <- merged$reads/merged$vol.x
 
+# Add ZOTU data to base map ---------------------------------------------------
+# Extract the columns required for plotting: 
+# zotuid, sample, easting, northing, and amplicons per ul.
+colnames(merged)
+nsis2.plotpoints <- merged[,c(2,6,37,38,112)]
+colnames(nsis2.plotpoints)
 
 # Filter the ESFN data frame --------------------------------------------------
 colnames(esfn.data)
-colSums(esfn.data[,310:330])
-drop <- c(rep(TRUE, 4),
-          rep(FALSE, 305),
-		  colSums(esfn.data[,310:330]) > 500,
-		  rep(TRUE, 33))
+colSums(esfn.data[,527:548])
+drop <- c(rep(TRUE, 3),
+          rep(FALSE, 523),
+		  colSums(esfn.data[,527:548]) > 1000,
+		  rep(TRUE, 35))
 esfn.data <- esfn.data[,drop]
 colnames(esfn.data)
 
 # Change the structure of the ESFN data frame ---------------------------------
 # Select only the ZOTU columns from the data frame.
-mesfn <- esfn.data[,c(5:8)]
+mesfn <- esfn.data[,c(4:6)]
 # Transpose the ZOTUs.
 mesfn <- t(mesfn)
 # Take the long format ZOTU table and stack the columns into one.
@@ -96,30 +104,31 @@ colnames(merged)
 merged$amplicons_per_ul <- merged$pas.reads/merged$vol.pas
 
 # Join NSIS and ESFN data -----------------------------------------------------
-colnames(zotuplotpoints)
 colnames(merged)
-merged <- merged[,c(2,21,30,31,45)]
-colnames(merged)
+# Extract the columns required for plotting: 
+# zotuid, sample, easting, northing, and amplicons per ul.
+esfn.plotpoints <- merged[,c(2,21,30,31,45)]
+colnames(esfn.plotpoints)
 
 # Rename ESFN coordinate columns.
-merged <- rename(merged,
-                 EASTING = GIS_X_V2,
-                 NORTHING = GIS_Y_V2)
-colnames(merged)
+esfn.plotpoints <- rename(esfn.plotpoints,
+                          EASTING = GIS_X_V2,
+                          NORTHING = GIS_Y_V2)
+colnames(esfn.plotpoints)
 # Add a sample pool column.
-merged$sample_pool <- "ESFN"
+esfn.plotpoints$sample_pool <- "ESFN"
 
-colnames(zotuplotpoints)
 # rename NSIS2 coordinate columns.
-zotuplotpoints <- rename(zotuplotpoints,
+nsis2.plotpoints <- rename(nsis2.plotpoints,
                          EASTING = NSIS2.EASTING,
-                         NORTHING = NSIS2.NORTHING)
-colnames(zotuplotpoints)
-zotuplotpoints$sample_pool <- "NSIS2"
-zotuplotpoints$sample <- as.factor(zotuplotpoints$sample)
+                         NORTHING = NSIS2.NORTHING,
+                         sample = sample.x)
+colnames(nsis2.plotpoints)
+nsis2.plotpoints$sample_pool <- "NSIS2"
+nsis2.plotpoints$sample <- as.factor(nsis2.plotpoints$sample)
 
 # Join NSIS and ESFN data tables.
-all_plot_points <- rbind(merged, zotuplotpoints)
+all_plot_points <- rbind(esfn.plotpoints, nsis2.plotpoints)
 all_plot_points$sample_pool <- as.factor(all_plot_points$sample_pool)
 print(levels(all_plot_points$sample_pool))
 # Re-order the levels of the sample pool column factors.
@@ -128,15 +137,8 @@ all_plot_points$sample_pool <- factor(all_plot_points$sample_pool,
 
 print(levels(all_plot_points$zotu))
 all_plot_points$zotu <- factor(all_plot_points$zotu,
-                               levels(all_plot_points$zotu)[c(1,3,5,2,6,7,8,4)])
+                               levels(all_plot_points$zotu)[c(2,3,1,4,5,6,7)])
 
-
-# Add ZOTU data to base map ---------------------------------------------------
-# Extract the columns required for plotting: 
-# zotuid, sample, easting, northing, and amplicons per ul.
-colnames(merged)
-zotuplotpoints <- merged[,c(2,5,28,29, 87)]
-colnames(zotuplotpoints)
 
 # Plot all samples included in the dataset after filtering from NSIS2 samples.
 p1 = basemap + geom_point(mapping = aes(NSIS2.EASTING, NSIS2.NORTHING),
@@ -148,7 +150,6 @@ p1 = basemap + geom_point(mapping = aes(NSIS2.EASTING, NSIS2.NORTHING),
 p1
 
 # Plot all samples included in the dataset after filtering from ESFN samples.
-# esfn.data <- read.csv("esfn_metadata_zotus_merged.csv")
 # NB: the above file providing exact coordinates of farms is not provided.
 p2 =  p1 + geom_point(shape = 24,
                       size = 3,
@@ -173,4 +174,4 @@ p4 = p2 + geom_point(mapping = aes(EASTING, NORTHING,
 p4
 
 # Save as a scalable vector graphic.
-ggsave("NSIS_and_ESFN_map.svg", dpi=600)
+ggsave("Figures/NSIS_and_ESFN_map.svg", dpi=600)

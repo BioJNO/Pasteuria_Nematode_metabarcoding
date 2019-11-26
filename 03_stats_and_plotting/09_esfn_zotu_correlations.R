@@ -2,11 +2,11 @@
 library(reshape)
 
 # Data -----------------------------------------------------------------------
-esfn_data <- read.csv("all-zotus-post-filter.csv")
+esfn_data <- read.csv("Pairwise_correlations/all_esfn_ZOTUS.csv")
 colnames(esfn_data)
 
 # Remove metadata.
-zotus <- esfn_data[,-c(1,2,329:334)]
+zotus <- esfn_data[,-c(1:2)]
 colnames(zotus)
 
 # Pairwise ZOTU correlations -------------------------------------------------
@@ -52,7 +52,7 @@ head(results)
 colnames(results)
 
 # Save all spearmans rank correlations.
-write.csv(results, "zotu-all-spearman-pairwise-correlations.csv")
+write.csv(results, "Pairwise_correlations/zotu-all-spearman-pairwise-correlations.csv")
 
 # Store  values as numeric.
 results$p.value <- as.character(results$p.value)
@@ -78,5 +78,14 @@ sig_filter2 <- subset(sig_filter, p.adj <=0.05)
 neg_filter2 <- subset(sig_filter2, rho < 0)
 pos_filter2 <- subset(sig_filter2, rho > 0)
 
-write.csv(sig_filter, "zotu_sig_spearman_pre_correction.csv")
-write.csv(sig_filter2, "zotu-sig_spearman_assoc_post-correction.csv")
+write.csv(sig_filter, "Pairwise_correlations/zotu_sig_spearman_pre_correction.csv")
+write.csv(sig_filter2, "Pairwise_correlations/zotu-sig_spearman_assoc_post-correction.csv")
+
+pas_sig <- sig_filter2[grep("Pasteuria", sig_filter2$taxa1),]
+pas_sig <- pas_sig[!grepl("Pasteuria", pas_sig$taxa2),]
+
+write.csv(pas_sig, "Pairwise_correlations//all_significant_pas_correlations.csv")
+
+esfn_data_X5 <- esfn_data[esfn_data$X5_Meloidogyne_1.0 > 1, ]
+
+esfn_data_X5$X5_Meloidogyne_1.0

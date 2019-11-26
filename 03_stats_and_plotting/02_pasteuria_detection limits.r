@@ -3,19 +3,17 @@ library(ggplot2)
 library(reshape2)
 library(plyr)
 library(multcompView)
+library(RColorBrewer)
+library(ggsci)
 
 # Load data table ------------------------------------------------------------
-pas_data <- read.csv("pas-zotus-merged-with-meta.csv",
+pas_data <- read.csv("pas-zotus-merged-with-meta-minabd-10.csv",
                      header =T,
                      na.strings = c("", " ", "NA"),
-                     colClasses = c(rep("factor",11),
-                                    rep("numeric", 154)))
+                     colClasses = c(rep("factor",12),
+                                    rep("numeric", 77)))
 
 colnames(pas_data)
-
-# Add total assembled read pair and perul columns.
-pas_data$total <- rowSums(pas_data[13:165])
-pas_data$perul <- pas_data$total/pas_data$vol
 
 # Data subgrouping -----------------------------------------------------------
 # Split controls into test conditions.
@@ -23,13 +21,14 @@ pen_det <- pas_data[grep("penetrans detection limits", pas_data$subgroup),]
 har_det <- pas_data[grep("hartismeri detection limits", pas_data$subgroup),]
 
 # Statistical analyses -------------------------------------------------------
-# Look at the average number of reads per PCR band score.
-aggregate(pas_data[, 167], list(pas_data$band), mean)
+# Look at the average number of reads per ul for each PCR band score.
+aggregate(pas_data[, 89], list(pas_data$band), mean)
 
 # Is the number of reads per microlitre statistically
 # significant between band scores?
 pasband_anova <- aov(perul ~ band, data = pas_data)
 summary(pasband_anova)
+# Yes
 
 # Is the number of reads per microlitre statistically
 # significant between ALL band scores?
@@ -49,6 +48,7 @@ generate_label_df <- function(tukey, variable){
 }
 
 generate_label_df(pasband_tukey, "band")
+# Yes
 
 # Get the Spearmans rank correlation of band score
 # to assembled read pairs per ul.
@@ -67,31 +67,32 @@ pen_det$template <- as.numeric(pen_det$template)
 
 # Get the Spearmans rank correlation of hartismeri template copy number and
 # total assembled read pairs/assembled pairs per ul.
-cor.test((har_det$total),
+cor.test(har_det$abundance,
          har_det$template,
          method = "spearman",
          conf.level = 0.95)
 
-cor.test((har_det$total/har_det$vol),
+cor.test(har_det$perul,
           har_det$template,
           method = "spearman",
           conf.level = 0.95)
 
 # Repeat for penetrans.          
-cor.test((pen_det$total),
+cor.test(pen_det$abundance,
          pen_det$template,
          method = "spearman",
          conf.level = 0.95)
          
-cor.test((pen_det$total/pen_det$vol),
+cor.test(pen_det$perul,
          pen_det$template,
          method = "spearman",
          conf.level = 0.95)          
 
 # Plot the results -----------------------------------------------------------
 # Band score vs assembled read pairs
+pas_data$band <- as.numeric(pas_data$band)
 bandscore_box <- ggplot(data = pas_data, 
-                        aes(band, perul)) +
+                        aes(band, perul, group=band)) +
                         geom_boxplot(aes(fill = band)) + 
                         xlab("PCR band score") + 
                         ylab("Assembled reads per ul") + 
@@ -100,65 +101,39 @@ bandscore_box <- ggplot(data = pas_data,
 bandscore_box
 
 # Save the plot as a scalable vector graphic.
-ggsave("pas_bandscore_scatter.svg",
-       dpi=600,
-       width = 6,
-       height = 4)
-
-# Hartismeri copy number vs total assembled reads.
-hartdet_totalplot <- ggplot(data = hart_det,
-                        aes(log(template), (total))) + 
-                        geom_boxplot(aes(fill = sample)) + 
-                        xlab("Log template copy number") + 
-                        ylab("Total assembled reads") + 
-                        geom_smooth(method="auto") + 
-                        geom_point(aes(colour = sample))        
-hartdet_totalplot
-
-ggsave("hartismeri_detection_scatter_curve_and_box.svg",
-       dpi=600,
-       width = 6,
-       height = 4)
+#ggsave("pas_bandscore_scatter.svg",
+#       dpi=600,
+#       width = 6,
+#       height = 4)
 
 # Hartismeri copy number vs assembled reads per ul.
-hartdet_perulplot <- ggplot(data = hart_det, aes(log(template), per.ul)) + 
+hartdet_perulplot <- ggplot(data = har_det, aes(log(template), perul)) + 
                         geom_boxplot(aes(fill = sample)) + 
                         xlab("Log Template Copy Number") + 
                         ylab("Amplicons per ul") + 
                         geom_smooth(method="auto") + 
-                        geom_point(aes(colour = sample))
+                        geom_point(aes(colour = sample)) +
+                        scale_fill_brewer(palette = "PuOr") +
+                        scale_color_brewer(palette = "PuOr")
 hartdet_perulplot
 
-ggsave("hartismeri_detection_scatter_curve_and_box_perul.svg",
+ggsave("Figures/Fig2B_hartismeri_detection_scatter_curve_and_box_perul.svg",
        dpi=600,
        width = 6,
        height = 4)
 
-# Penetrans copy number vs total assembled read pairs.
-pen_det_box <- ggplot(data = pen_det, aes(log(template), total)) +
-                      geom_boxplot(aes(fill = sample)) +
-                      xlab("Log Template Copy Number") +
-                      ylab("Total Amplicons") +
-                      geom_smooth(method="auto") +
-                      geom_point(aes(colour = sample))
-pen_det_box
-
-ggsave("penetrans_detection__scatter_curve_and_box_total.svg",
-       dpi= 600,
-       width = 6,
-       height = 4)
-
 # Penetrans copy number vs assembled read pairs perul.
-pen_det_box	<- ggplot(data = pen_det, aes(log(template), (total/vol))) +
+pen_det_box	<- ggplot(data = pen_det, aes(log(template), perul)) +
                       geom_boxplot(aes(fill = sample)) +
                       xlab("Log Template Copy Number") +
                       ylab("Amplicons per ul") +
                       geom_smooth(method="auto") +
-                      geom_point(aes(colour = sample))
-
+                      geom_point(aes(colour = sample)) +
+                      scale_fill_brewer(palette = "BrBG") +
+                      scale_color_brewer(palette = "BrBG")
 pen_det_box
 
-ggsave("penetrans_detection__scatter_curve_and_box_perul.svg",
+ggsave("Figures/Fig2A_penetrans_detection_scatter_curve_and_box_perul.svg",
         dpi= 600,
         width = 6,
         height = 4)
