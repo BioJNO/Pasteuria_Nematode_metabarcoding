@@ -28,14 +28,14 @@ cd /home/jo42324/metabarcode/analysis/sequence-analysis/Pasteuria_Nematode_metab
 # that may otherwise have been folded into a cluster with sequnce B. Thus
 # zotus allow greater resolution of metabarcode sequences.
 
-usearch -unoise3 ../QC-trimming-and-assembly/global-pas-derep.fasta \
+usearch -unoise3 global-pas-derep.fasta \
 -unoise_alpha 1 \
--tabbedout pasteuria_unoise3.txt \
--zotus pasteuria_alpha1_zotus.fasta
+-tabbedout pasteuria_unoise3_rerun.txt \
+-zotus pasteuria_alpha1_zotus_rerun.fasta
 
 # The version of usearch we are using does not like ZOTU instead of OTU as
 # the SeqID when it comes time to build the table so we will rename them.
-sed -i -e 's/Zotu/Otu/g' pasteuria_alpha1_zotus.fasta
+sed -i -e 's/Zotu/Otu/g' pasteuria_alpha1_zotus_rerun.fasta
 
 # Next we'll gather some ZOTU metadata into a tabular format
 # which we will use later on to filter the final ZOTU table.

@@ -2,7 +2,7 @@ cd /home/jo42324/metabarcode/analysis/sequence-analysis/Pasteuria_Nematode_metab
 
 # Map fq files to zotus to generate a ZOTU table.
 usearch -otutab all-pas-fq-w-usearch-sampleids.fastq \
--otus pasteuria_alpha1_zotus.fasta \
--otutabout pasteuria_alpha1_zotutab.txt \
+-otus pasteuria_alpha1_zotus_rerun.fasta \
+-otutabout pasteuria_alpha1_zotutab_rerun.txt \
 -mapout pasteuria_alpha1_zotu_map.txt \
 -notmatched pasteuria_alpha1_unmapped.fasta

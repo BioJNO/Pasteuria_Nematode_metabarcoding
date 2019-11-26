@@ -4,11 +4,11 @@
 from Bio.SeqIO.FastaIO import SimpleFastaParser
 
 # Set the file handle.
-fasta_handle = open("pasteuria_alpha1_zotus.fasta")
+fasta_handle = open("pasteuria_alpha1_zotus_rerun.fasta")
 
 # Open a blank output file. We're going to make a csv table with the seqid,
 # length, and sequnce for each zotu.
-outfile = open("pasteuria_zotu_metadata.csv", "w")
+outfile = open("pasteuria_zotu_metadata_rerun.csv", "w")
 
 # Write column headers to the output file.
 outfile.write("Zotu_ID,seqlen,seq\n")
